@@ -1,0 +1,49 @@
+parameters:
+- name: ServiceConnectionName
+  displayName: Service Connection Name
+  type: string
+
+- name: ContainerRegistry
+  displayName: Container Registry
+  type: string
+
+- name: Dockerfile
+  displayName: Dockerfile path
+  type: string
+
+- name: ImageName
+  displayName: Image Name
+  type: string
+
+- name: ImageTag
+  displayName: Image Tag
+  type: string
+
+steps:
+- task: Docker@2
+  displayName: Docker login
+  inputs:
+    containerRegistry: ${{parameters.ServiceConnectionName}}
+    command: 'login'
+
+- task: Docker@2
+  displayName: Build Image ${{parameters.ImageName}}
+  inputs:
+    containerRegistry: ${{parameters.ServiceConnectionName}}
+    repository: ${{lower(parameters.ImageName)}}
+    command: 'build'
+    Dockerfile: ${{parameters.Dockerfile}}
+    tags: |
+      ${{parameters.ImageTag}}
+      latest
+
+- task: Docker@2
+  displayName: Push Image ${{parameters.ImageName}}
+  inputs:
+    containerRegistry: ${{parameters.ServiceConnectionName}}
+    repository: ${{lower(parameters.ImageName)}}
+    command: 'push'
+    tags: |
+      ${{parameters.ImageTag}}
+      latest
+
